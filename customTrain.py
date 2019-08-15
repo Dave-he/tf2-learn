@@ -28,9 +28,6 @@ class Model(object):
   def __call__(self, x):
     return self.W * x + self.b
 
-model = Model()
-
-
 def loss(predicted_y, target_y):
   return tf.reduce_mean(tf.square(predicted_y - target_y))
   
