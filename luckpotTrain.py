@@ -6,21 +6,21 @@ import tensorflow as tf
 
 # train_dataset_fp = tf.keras.utils.get_file(fname=os.path.basename(train_dataset_url),
 #                                            origin=train_dataset_url)
-train_dataset_fp = "./dataset/iris_training.csv"
+train_dataset_fp = "./dataset/luckpot_train.csv"
 # test_url = "https://storage.googleapis.com/download.tensorflow.org/data/iris_test.csv"
 
 # test_fp = tf.keras.utils.get_file(fname=os.path.basename(test_url),
 #                                   origin=test_url)
-test_fp = "./dataset/iris_test.csv"
+test_fp = "./dataset/luckpot_test.csv"
 print("Local copy of the dataset file: {}".format(train_dataset_fp))
 
 # CSV文件中列的顺序
-column_names = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'species']
+column_names = ['num','red_1', 'red_2', 'red_3', 'red_4', 'red_5','red_6','blue_1']
 
-feature_names = column_names[:-1]
-label_name = column_names[-1]
+feature_names = column_names[1:]
+label_name = column_names[0]
 
-print("Features: {}".format(feature_names))
+print("FeatureNames: {}".format(feature_names))
 print("Label: {}".format(label_name))
 
 class_names = ['Iris setosa', 'Iris versicolor', 'Iris virginica']
@@ -32,20 +32,13 @@ train_dataset = tf.data.experimental.make_csv_dataset(
     batch_size,
     column_names=column_names,
     label_name=label_name,
+    
     num_epochs=1)
 
 features, labels = next(iter(train_dataset))
 
-print(features)
+print("Features: {}".format(features))
 
-plt.scatter(features['petal_length'],
-            features['sepal_length'],
-            c=labels,
-            cmap='viridis')
-
-plt.xlabel("Petal length")
-plt.ylabel("Sepal length")
-plt.show()
 
 def pack_features_vector(features, labels):
   """将特征打包到一个数组中"""
@@ -56,19 +49,27 @@ train_dataset = train_dataset.map(pack_features_vector)
 
 features, labels = next(iter(train_dataset))
 
-print(features[:5])
+print(features)
 
 model = tf.keras.Sequential([
-  tf.keras.layers.Dense(10, activation=tf.nn.relu, input_shape=(4,)),  # 需要给出输入的形式
+  tf.keras.layers.Dense(14, activation=tf.nn.relu, input_shape=(7,)),  # 需要给出输入的形式
+  tf.keras.layers.Dense(20, activation=tf.nn.relu),
+  tf.keras.layers.Dense(3),
+  tf.keras.layers.Dense(40, activation=tf.nn.relu),
+  tf.keras.layers.Dense(3),
+  tf.keras.layers.Dense(30, activation=tf.nn.relu),
+  tf.keras.layers.Dense(3),
+  tf.keras.layers.Dense(15, activation=tf.nn.relu),
+  tf.keras.layers.Dense(3),
   tf.keras.layers.Dense(10, activation=tf.nn.relu),
   tf.keras.layers.Dense(3)
 ])
 
 
 predictions = model(features)
-predictions[:5]
+predictions[:7]
 
-tf.nn.softmax(predictions[:5])
+tf.nn.softmax(predictions[:7])
 
 print("Prediction: {}".format(tf.argmax(predictions, axis=1)))
 print("    Labels: {}".format(labels))
@@ -152,7 +153,7 @@ test_dataset = tf.data.experimental.make_csv_dataset(
     test_fp,
     batch_size,
     column_names=column_names,
-    label_name='species',
+    label_name='num',
     num_epochs=1,
     shuffle=False)
 
@@ -166,16 +167,16 @@ for (x, y) in test_dataset:
 
 print("Test set accuracy: {:.3%}".format(test_accuracy.result()))
 
-predict_dataset = tf.convert_to_tensor([
-    [5.1, 3.3, 1.7, 0.5,],
-    [5.9, 3.0, 4.2, 1.5,],
-    [6.9, 3.1, 5.4, 2.1]
-])
+# predict_dataset = tf.convert_to_tensor([
+#     [5.1, 3.3, 1.7, 0.5,],
+#     [5.9, 3.0, 4.2, 1.5,],
+#     [6.9, 3.1, 5.4, 2.1]
+# ])
 
-predictions = model(predict_dataset)
+# predictions = model(predict_dataset)
 
-for i, logits in enumerate(predictions):
-  class_idx = tf.argmax(logits).numpy()
-  p = tf.nn.softmax(logits)[class_idx]
-  name = class_names[class_idx]
-  print("Example {} prediction: {} ({:4.1f}%)".format(i, name, 100*p))
+# for i, logits in enumerate(predictions):
+#   class_idx = tf.argmax(logits).numpy()
+#   p = tf.nn.softmax(logits)[class_idx]
+#   name = class_names[class_idx]
+#   print("Example {} prediction: {} ({:4.1f}%)".format(i, name, 100*p))
